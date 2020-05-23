@@ -1,0 +1,70 @@
+﻿@using TestBlazor.Data
+@using WebApiEF.DAL.Models
+
+@using Newtonsoft.Json.Linq
+@page "/"
+@inject AgreementBlazorService agreementService
+
+
+<h3> Договори </h3>
+@if (dogovor == null)
+{
+    <p><em>Завантаження даних...</em></p>
+}
+else
+{
+
+
+    <table class='table'>
+        <thead>
+
+            <tr>
+                <th>Номер угоди</th>
+                <th>Назва</th>
+                <th>Контактна персона</th>
+                <th>Продукція</th>
+                <th>Кількість</th>
+                <th>Дата</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            @foreach (var item in dogovor)
+            {
+            <tr>
+                <td>@item.GetValue("agreementNumber")</td>
+                <td>@item.GetValue("nameClient")</td>
+                <td>@item.GetValue("personClient")</td>
+                <td>@item.GetValue("productName")</td>
+                <td>@item.GetValue("numberProduct")</td>
+                <td>@item.GetValue("adreementdate")</td>
+            </tr>
+            }
+
+
+
+
+        </tbody>
+    </table>
+}
+
+@code {
+   
+    IEnumerable<JObject> dogovor;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        await load();
+    }
+    protected async Task load()
+
+    {
+        dogovor = await agreementService.GetDogovor();
+        //Console.WriteLine(roma);
+        //foreach (object s in roma)
+        //    Console.WriteLine(s.GetType());
+    }
+
+}

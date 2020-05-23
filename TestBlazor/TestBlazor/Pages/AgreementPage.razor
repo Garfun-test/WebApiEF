@@ -1,0 +1,159 @@
+﻿@using WebApiEF.DAL.Models
+@using TestBlazor.Data
+
+@page "/Agreement"
+@inject AgreementBlazorService agreementBlazorService
+
+<h1>Угоди</h1>
+
+<p>Цей компонент демонструє дані про угоди.</p>
+
+@if (agreements == null)
+{
+    <p><em>Завантаження данних...</em></p>
+}
+else
+{
+    <button @onclick="Add" class="btn btn-success">Додати</button>
+    <table class='table table-hover'>
+        <thead>
+            <tr>
+                <th>Номер угоди</th>
+                <th>Клієнт</th>
+                <th>Дата угоди</th>
+                <th>Сума</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in agreements)
+            {
+                <tr @onclick="(() => Show(item.IdAgreement.ToString()))">
+                    <td>@item.IdAgreement</td>
+                    <td>"<em>@item.Clients.Name</em>" @item.Clients.ContactPerson</td>
+                    <td>@item.DateAgreement.ToShortDateString()</td>
+                    <td>@item.Sum</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@if (agreements != null && mode == MODE.Add)
+{
+    //<input @bind="@idClient" placeholder="1" />
+    //<br />
+    <select @bind="@idClient"> @foreach (var item in clients) {<option value="@item.IdClient"> @item.Name </option>}</select>
+    <br />
+    <input @bind="@dateAgreement" placeholder="2" />
+    <br />
+    <input @bind="@sum" placeholder="3" />
+    <br />
+    <button @onclick="Insert" class="btn btn-primary">Вставити</button>
+
+}
+
+
+@if (agreements != null && mode == MODE.EditDelete) // Update & Delete form
+{
+    <input @bind="@idClient" placeholder="1" />
+    <br />
+    <input @bind="@dateAgreement" placeholder="2" />
+    <br />
+    <input @bind="@sum" placeholder="3" />
+    <br />
+    <button @onclick="Update" class="btn btn-primary">Оновити</button>
+    <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
+    <button @onclick="Delete" class="btn btn-danger">Видалити</button>
+}
+
+
+
+@code {
+
+    Clients[] clients;
+
+
+    Agreement[] agreements;
+
+    int idAgreement;
+    int idClient;
+    DateTime dateAgreement;
+    double sum;
+
+    private enum MODE { None, Add, EditDelete };
+    MODE mode = MODE.None;
+    Agreement agreement;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        await load();
+    }
+    protected async Task load()
+    {
+        agreements = await agreementBlazorService.GetAgreementAsync();
+        clients = await agreementBlazorService.GetClientsAsync();
+    }
+
+
+    protected async Task Insert()
+    {
+        Agreement a = new Agreement()
+        {
+
+            IdClient = idClient,
+            DateAgreement = dateAgreement,
+            Sum = sum
+        };
+        await agreementBlazorService.InsertAgreementAsync(a);
+        ClearFields();
+        await load();
+        mode = MODE.None;
+    }
+    protected void ClearFields()
+    {
+        //name = string.Empty;
+        //telephone = string.Empty;
+        //contactPerson = string.Empty;
+        //address = string.Empty;
+    }
+    protected void Add()
+    {
+        ClearFields();
+        mode = MODE.Add;
+    }
+    protected async Task Update()
+    {
+
+        Agreement a = new Agreement()
+        {
+            IdAgreement = idAgreement,
+            IdClient = idClient,
+            DateAgreement = dateAgreement,
+            Sum = sum
+        };
+
+        await agreementBlazorService.UpdateAgreementAsync(idAgreement.ToString(), a);
+        ClearFields();
+        await load();
+        mode = MODE.None;
+    }
+
+    protected async Task Delete()
+    {
+        await agreementBlazorService.DeleteAgreementAsync(idAgreement.ToString());
+        ClearFields();
+        await load();
+        mode = MODE.None;
+    }
+    protected async Task Show(string id)
+    {
+        agreement = await agreementBlazorService.GetAgreementByIdAsync(id);
+        idAgreement = agreement.IdAgreement;
+        idClient = agreement.IdClient;
+        dateAgreement = agreement.DateAgreement;
+        sum = agreement.Sum;
+        mode = MODE.EditDelete;
+    }
+}

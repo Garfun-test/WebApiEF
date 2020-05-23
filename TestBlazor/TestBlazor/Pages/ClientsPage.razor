@@ -1,0 +1,161 @@
+﻿@using WebApiEF.DAL.Models
+@using TestBlazor.Data
+
+@page "/Clients"
+@inject ClientsBlazorService clientsBlazorService
+
+
+<h1> Клієнти </h1>
+
+
+@if (clients == null)
+{
+    <p><em>Завантаження данних...</em></p>
+}
+else
+{
+
+    <button @onclick="Add" class="btn btn-success">Додати</button>
+    <table class='table table-hover'>
+        <thead>
+            <tr>
+                <th>Код Клієнта</th>
+                <th>Назва</th>
+                <th>Телефон</th>
+                <th>Контактна особа</th>
+                <th>Адреса</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in clients)
+            {
+                <tr @onclick="(() => Show(item.IdClient.ToString()))">
+                    <td>@item.IdClient</td>
+                    <td>@item.Name</td>
+                    <td>@item.Telephone</td>
+                    <td>@item.ContactPerson</td>
+                    <td>@item.Address</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+@if (clients != null && mode == MODE.Add)
+{
+    <input @bind="@name" placeholder="Назва" />
+    <br />
+    <input @bind="@telephone" placeholder="Телефон" />
+    <br />
+    <input @bind="@contactPerson" placeholder="Контактна персона" />
+    <br />
+    <input @bind="@address" placeholder="Адреса" />
+    <br />
+    <button @onclick="Insert" class="btn btn-primary">Вставити</button>
+
+}
+
+
+@if (clients != null && mode == MODE.EditDelete) // Update & Delete form
+{
+    <input @bind="@name" placeholder="Назва" />
+    <br />
+    <input @bind="@telephone" placeholder="Телефон" />
+    <br />
+    <input @bind="@contactPerson" placeholder="Контактна персона" />
+    <br />
+    <input @bind="@address" placeholder="Адреса" />
+    <br />
+    <button @onclick="Update" class="btn btn-primary">Оновити</button>
+    <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
+    <button @onclick="Delete" class="btn btn-danger">Видалити</button>
+}
+
+
+
+@code {
+    Clients[] clients;
+
+    int idClient;
+    string name;
+    string telephone;
+    string contactPerson;
+    string address;
+
+    private enum MODE { None, Add, EditDelete };
+    MODE mode = MODE.None;
+    Clients client;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        await load();
+    }
+    protected async Task load()
+    {
+        clients = await clientsBlazorService.GetClientsAsync();
+    }
+
+    protected async Task Insert()
+    {
+        Clients c = new Clients()
+        {
+
+            Name = name,
+            Telephone = telephone,
+            ContactPerson = contactPerson,
+            Address = address
+        };
+        await clientsBlazorService.InsertClientAsync(c);
+        ClearFields();
+        await load();
+        mode = MODE.None;
+    }
+    protected void ClearFields()
+    {
+        name = string.Empty;
+        telephone = string.Empty;
+        contactPerson = string.Empty;
+        address = string.Empty;
+    }
+    protected void Add()
+    {
+        ClearFields();
+        mode = MODE.Add;
+    }
+    protected async Task Update()
+    {
+
+        Clients c = new Clients()
+        {
+            IdClient = idClient,
+            Name = name,
+            Telephone = telephone,
+            ContactPerson = contactPerson,
+            Address = address
+        };
+
+        await clientsBlazorService.UpdateClientAsync(idClient.ToString(), c);
+        ClearFields();
+        await load();
+        mode = MODE.None;
+    }
+
+    protected async Task Delete()
+    {
+        await clientsBlazorService.DeleteClientAsync(idClient.ToString());
+        ClearFields();
+        await load();
+        mode = MODE.None;
+    }
+    protected async Task Show(string id)
+    {
+        client = await clientsBlazorService.GetClientByIdAsync(id);
+        idClient = client.IdClient;
+        name = client.Name;
+        telephone = client.Telephone;
+        contactPerson = client.ContactPerson;
+        address = client.Address;
+        mode = MODE.EditDelete;
+    }
+}

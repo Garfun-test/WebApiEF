@@ -1,0 +1,8 @@
+C:\Users\dmytr\source\repos\WebApiEF\WebApiEF.DAL\bin\Debug\netcoreapp3.1\WebApiEF.DAL.deps.json
+C:\Users\dmytr\source\repos\WebApiEF\WebApiEF.DAL\bin\Debug\netcoreapp3.1\WebApiEF.DAL.dll
+C:\Users\dmytr\source\repos\WebApiEF\WebApiEF.DAL\bin\Debug\netcoreapp3.1\WebApiEF.DAL.pdb
+C:\Users\dmytr\source\repos\WebApiEF\WebApiEF.DAL\obj\Debug\netcoreapp3.1\WebApiEF.DAL.csprojAssemblyReference.cache
+C:\Users\dmytr\source\repos\WebApiEF\WebApiEF.DAL\obj\Debug\netcoreapp3.1\WebApiEF.DAL.AssemblyInfoInputs.cache
+C:\Users\dmytr\source\repos\WebApiEF\WebApiEF.DAL\obj\Debug\netcoreapp3.1\WebApiEF.DAL.AssemblyInfo.cs
+C:\Users\dmytr\source\repos\WebApiEF\WebApiEF.DAL\obj\Debug\netcoreapp3.1\WebApiEF.DAL.dll
+C:\Users\dmytr\source\repos\WebApiEF\WebApiEF.DAL\obj\Debug\netcoreapp3.1\WebApiEF.DAL.pdb

@@ -1,0 +1,143 @@
+﻿@using WebApiEF.DAL.Models
+@using TestBlazor.Data
+
+@page "/AgreementDetails"
+@inject AgreementDetailsBlazorService agreementDetailsBlazorService
+
+
+<h1> Відомості про угоди </h1>
+
+
+@if (agreementDetails == null)
+{
+    <p><em>Завантаження данних...</em></p>
+}
+else
+{
+
+    <button @onclick="Add" class="btn btn-success">Додати</button>
+    <table class='table table-hover'>
+        <thead>
+            <tr>
+                <th>Номер угоди</th>
+                <th>Номер продукції</th>
+                <th>Кількість</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in agreementDetails)
+            {
+                <tr @onclick="(() => Show(item.IdAgreement.ToString(), item.IdProduct.ToString()))">
+                    <td>@item.IdAgreement</td>
+                    <td>@item.IdProduct</td>
+                    <td>@item.Number</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+@if (agreementDetails != null && mode == MODE.Add)
+{
+    <input @bind="@idAgreement" placeholder="Номер угоди" />
+    <br />
+    <input @bind="@idProduct" placeholder="Код продукції" />
+    <br />
+    <input @bind="@number" placeholder="Кількість" />
+    <br />
+    <button @onclick="Insert" class="btn btn-primary">Вставити</button>
+
+}
+
+
+@if (agreementDetails != null && mode == MODE.EditDelete) // Update & Delete form
+{
+    <input @bind="@idAgreement" placeholder="Номер угоди" />
+    <br />
+    <input @bind="@idProduct" placeholder="Код продукції" />
+    <br />
+    <input @bind="@number" placeholder="Кількість" />
+    <br />
+    <button @onclick="Update" class="btn btn-primary">Оновити</button>
+    <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
+    <button @onclick="Delete" class="btn btn-danger">Видалити</button>
+}
+
+
+
+@code {
+    AgreementDetails[] agreementDetails;
+
+    int idAgreement;
+    int idProduct;
+    int number;
+
+    private enum MODE { None, Add, EditDelete };
+    MODE mode = MODE.None;
+    AgreementDetails agreementDetail;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        await load();
+    }
+    protected async Task load()
+    {
+        agreementDetails = await agreementDetailsBlazorService.GetAgreementDetailsAsync();
+    }
+
+    protected async Task Insert()
+    {
+        AgreementDetails ad = new AgreementDetails()
+        {
+
+            IdAgreement = idAgreement,
+            IdProduct = idProduct,
+            Number = number
+        };
+        await agreementDetailsBlazorService.InsertAgreementDetailsAsync(ad);
+        ClearFields();
+        await load();
+        mode = MODE.None;
+    }
+    protected void ClearFields()
+    {
+
+    }
+    protected void Add()
+    {
+        ClearFields();
+        mode = MODE.Add;
+    }
+    protected async Task Update()
+    {
+
+        AgreementDetails ad = new AgreementDetails()
+        {
+            IdAgreement = idAgreement,
+            IdProduct = idProduct,
+            Number = number
+        };
+
+        await agreementDetailsBlazorService.UpdateAgreementDetailsAsync(idAgreement.ToString(), ad);
+        ClearFields();
+        await load();
+        mode = MODE.None;
+    }
+
+    protected async Task Delete()
+    {
+        await agreementDetailsBlazorService.DeleteAgreementDetailsAsync(idAgreement.ToString());
+        ClearFields();
+        await load();
+        mode = MODE.None;
+    }
+    protected async Task Show(string id, string id2)
+    {
+        agreementDetail = await agreementDetailsBlazorService.GetAgreementDetailsByIdAsync(id,id2);
+        idAgreement = agreementDetail.IdAgreement;
+        idProduct = agreementDetail.IdProduct;
+        number = agreementDetail.Number;
+        mode = MODE.EditDelete;
+    }
+}

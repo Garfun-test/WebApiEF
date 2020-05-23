@@ -1,0 +1,159 @@
+﻿@using WebApiEF.DAL.Models
+@using TestBlazor.Data
+
+@page "/Products"
+@inject ProductsBlazorService productsBlazorService
+
+
+<h1> Продукція </h1>
+
+
+@if (products == null)
+{
+    <p><em>Завантаження данних...</em></p>
+}
+else
+{
+
+    <button @onclick="Add" class="btn btn-success">Додати</button>
+    <table class='table table-hover'>
+        <thead>
+            <tr>
+                <th>Код продукції</th>
+                <th>Назва</th>
+                <th>Ціна</th>
+                <th>Ціна(оптом)</th>
+                <th>Опис</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in products)
+            {
+                <tr @onclick="(() => Show(item.IdProduct.ToString()))">
+                    <td>@item.IdProduct</td>
+                    <td>@item.NameProduct</td>
+                    <td>@item.PriceRetail</td>
+                    <td>@item.PriceWholesale</td>
+                    <td>@item.Description</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+@if (products != null && mode == MODE.Add)
+{
+    <input @bind="@nameProduct" placeholder="Назва продукції" />
+    <br />
+    <input @bind="@priceRetail" placeholder="Ціна" />
+    <br />
+    <input @bind="@priceWholesale" placeholder="Ціна(оптом)" />
+    <br />
+    <input @bind="@description" placeholder="Опис" />
+    <br />
+    <button @onclick="Insert" class="btn btn-primary">Вставити</button>
+
+}
+
+
+@if (products != null && mode == MODE.EditDelete) // Update & Delete form
+{
+    <input @bind="@nameProduct" placeholder="Назва продукції" />
+    <br />
+    <input @bind="@priceRetail" placeholder="Ціна" />
+    <br />
+    <input @bind="@priceWholesale" placeholder="Ціна(оптом)" />
+    <br />
+    <input @bind="@description" placeholder="Опис" />
+    <br />
+    <button @onclick="Update" class="btn btn-primary">Оновити</button>
+    <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
+    <button @onclick="Delete" class="btn btn-danger">Видалити</button>
+}
+
+
+
+@code {
+    Products[] products;
+
+    int idProduct;
+    string nameProduct;
+    double priceRetail;
+    double priceWholesale;
+    string description;
+
+    private enum MODE { None, Add, EditDelete };
+    MODE mode = MODE.None;
+    Products product;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        await load();
+    }
+    protected async Task load()
+    {
+        products = await productsBlazorService.GetProductsAsync();
+    }
+
+    protected async Task Insert()
+    {
+        Products p = new Products()
+        {
+
+            NameProduct = nameProduct,
+            PriceRetail = priceRetail,
+            PriceWholesale = priceWholesale,
+            Description = description
+        };
+        await productsBlazorService.InsertProductsAsync(p);
+        ClearFields();
+        await load();
+        mode = MODE.None;
+    }
+    protected void ClearFields()
+    {
+        nameProduct = string.Empty;
+        description = string.Empty;
+    }
+    protected void Add()
+    {
+        ClearFields();
+        mode = MODE.Add;
+    }
+    protected async Task Update()
+    {
+
+        Products p = new Products()
+        {
+            IdProduct = idProduct,
+            NameProduct = nameProduct,
+            PriceRetail = priceRetail,
+            PriceWholesale = priceWholesale,
+            Description = description
+        };
+
+        await productsBlazorService.UpdateProductsAsync(idProduct.ToString(), p);
+        ClearFields();
+        await load();
+        mode = MODE.None;
+    }
+
+    protected async Task Delete()
+    {
+        await productsBlazorService.DeleteProductsAsync(idProduct.ToString());
+        ClearFields();
+        await load();
+        mode = MODE.None;
+    }
+    protected async Task Show(string id)
+    {
+        product = await productsBlazorService.GetProductsByIdAsync(id);
+        idProduct = product.IdProduct;
+        nameProduct = product.NameProduct;
+        priceRetail = product.PriceRetail;
+        priceWholesale = product.PriceWholesale;
+        description = product.Description;
+        mode = MODE.EditDelete;
+    }
+}
